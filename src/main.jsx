@@ -24,7 +24,7 @@ const theatres = [
   { id: 4, name: 'Vanitha Vineetha', area: 'Palarivattom · Kochi', distance: '5.6 km', eta: '22 min', rating: '4.4', formats: ['Dolby Atmos', 'Recliner'], price: 200, source: 'Operator', updated: '8 min ago', accent: PALETTE.plum, shows: [{ time: '12:00 PM', price: 200, availability: 'Plenty' }, { time: '3:15 PM', price: 220, availability: 'Plenty' }, { time: '6:30 PM', price: 250, availability: 'Filling fast' }, { time: '9:45 PM', price: 250, availability: 'Filling fast' }] },
 ];
 
-function Poster({ movie }) { return <div className="poster" style={{ '--poster': movie.accent }}><span className="poster-icon">{movie.icon}</span><strong>{movie.title}</strong><small>{movie.genre}</small></div>; }
+function Poster({ movie }) { return <div className="poster" style={{ '--poster': movie.accent }}>{movie.posterUrl && <img className="poster-image" src={movie.posterUrl} alt={`${movie.title} poster`} loading="lazy" onError={(event) => { event.currentTarget.style.display = 'none'; }} />}<span className="poster-icon">{movie.icon}</span><strong>{movie.title}</strong><small>{movie.genre}</small></div>; }
 function Freshness({ theatre }) { return <span className="freshness"><span className="live-dot"/> Data updated · {theatre.source}</span>; }
 function Availability({ value }) { const tone = value === 'Plenty' ? 'green' : value === 'Filling fast' ? 'cyan' : 'pink'; return <span className={`availability ${tone}`}><i/> {value}</span>; }
 
