@@ -2,7 +2,7 @@
 
 ShowScout uses semantic CSS tokens in `src/styles.css`. Light and dark values are defined on `:root` and `:root[data-theme="dark"]`; components consume tokens such as `--bg`, `--surface`, `--text`, `--accent`, and `--teal-text` rather than raw palette colours.
 
-Modes are `light`, `dark`, and `system`. The choice is stored under `showscout-theme`, applied before first paint by the inline script in `index.html`, synchronized across tabs, and updated when the OS preference changes. The header control toggles light/dark directly; its chevron exposes all three modes. `Shift+D` toggles the resolved theme.
+Modes are `light` and `dark`. The choice is stored under `showscout-theme`, applied before first paint by the inline script in `index.html`, and synchronized across tabs. On first visit, the OS preference chooses the initial theme; after that, the user’s light/dark choice is retained. The header control toggles between the two modes directly. `Shift+D` toggles the theme.
 
 ## Rules
 

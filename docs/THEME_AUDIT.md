@@ -5,8 +5,8 @@ The initial audit found hardcoded colours in the legacy `src/extra-pages.css`, `
 Changed in the theme rebuild:
 
 - `index.html`: pre-paint theme script, color-scheme metadata, dynamic theme-color metadata.
-- `src/theme.js`: three-mode store, localStorage, system preference, cross-tab sync, resolved theme application.
-- `src/main.jsx`: accessible toggle, mode popover, keyboard shortcut, live announcement, semantic accent data.
+- `src/theme.js`: two-mode store, localStorage, OS-based first-visit default, cross-tab sync, resolved theme application.
+- `src/main.jsx`: accessible toggle, keyboard shortcut, live announcement, semantic accent data.
 - `src/styles.css`: light/dark token system, contrast-safe components, forced-colors, high-contrast, reduced-motion, print rules.
 - `src/Logo.jsx`, `src/logo.css`, `public/showscout-mark.png`: theme-aware logo lockup.
 - Removed unused legacy hardcoded-color page styles.

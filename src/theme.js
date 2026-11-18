@@ -2,12 +2,13 @@ import { useSyncExternalStore } from 'react';
 
 const KEY = 'showscout-theme';
 const listeners = new Set();
-const validModes = new Set(['light', 'dark', 'system']);
+const validModes = new Set(['light', 'dark']);
 const canUseDom = typeof window !== 'undefined';
 const systemIsDark = () => canUseDom && window.matchMedia('(prefers-color-scheme: dark)').matches;
-const readMode = () => { try { const value = window.localStorage.getItem(KEY); return validModes.has(value) ? value : 'system'; } catch { return 'system'; } };
+const readMode = () => { try { const value = window.localStorage.getItem(KEY); return validModes.has(value) ? value : (systemIsDark() ? 'dark' : 'light'); } catch { return systemIsDark() ? 'dark' : 'light'; } };
 let mode = canUseDom ? readMode() : 'system';
-let resolved = mode === 'system' ? (systemIsDark() ? 'dark' : 'light') : mode;
+if (mode === 'system') mode = 'light';
+let resolved = mode;
 let snapshot = { mode, resolved };
 
 function applyTheme(nextResolved) {
@@ -19,8 +20,8 @@ function applyTheme(nextResolved) {
   document.querySelectorAll('[data-theme-color]').forEach((element) => element.setAttribute('content', nextResolved === 'dark' ? '#140A1C' : '#FAF7F8'));
 }
 function publish(nextMode, announce = true) {
-  mode = validModes.has(nextMode) ? nextMode : 'system';
-  resolved = mode === 'system' ? (systemIsDark() ? 'dark' : 'light') : mode;
+  mode = validModes.has(nextMode) ? nextMode : 'light';
+  resolved = mode;
   snapshot = { mode, resolved };
   applyTheme(resolved);
   try { window.localStorage.setItem(KEY, mode); } catch { /* private mode is still fully functional */ }
@@ -29,10 +30,9 @@ function publish(nextMode, announce = true) {
 }
 if (canUseDom) {
   applyTheme(resolved);
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (mode === 'system') publish('system', false); });
-  window.addEventListener('storage', (event) => { if (event.key === KEY) publish(event.newValue || 'system', false); });
+  window.addEventListener('storage', (event) => { if (event.key === KEY) publish(event.newValue || (systemIsDark() ? 'dark' : 'light'), false); });
 }
-export function useTheme() { return useSyncExternalStore((listener) => { listeners.add(listener); return () => listeners.delete(listener); }, () => snapshot, () => ({ mode: 'system', resolved: 'light' })); }
+export function useTheme() { return useSyncExternalStore((listener) => { listeners.add(listener); return () => listeners.delete(listener); }, () => snapshot, () => ({ mode: 'light', resolved: 'light' })); }
 export function setThemeMode(nextMode) { publish(nextMode); }
 export function toggleTheme() { publish(resolved === 'dark' ? 'light' : 'dark'); }
 export function themeStorageKey() { return KEY; }

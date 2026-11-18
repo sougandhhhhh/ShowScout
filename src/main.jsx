@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { ArrowRight, Bell, CalendarDays, Check, ChevronDown, Film, Heart, Info, LayoutGrid, List, Map, MapPin, Menu, Monitor, Moon, Search, SlidersHorizontal, Sparkles, Star, Sun, X, Zap } from 'lucide-react';
+import { ArrowRight, Bell, CalendarDays, Check, ChevronDown, Film, Heart, Info, LayoutGrid, List, Map, MapPin, Menu, Moon, Search, SlidersHorizontal, Sparkles, Star, Sun, X, Zap } from 'lucide-react';
 import './styles.css';
 import './logo.css';
 import { Logo } from './Logo.jsx';
-import { setThemeMode, toggleTheme, useTheme } from './theme.js';
+import { toggleTheme, useTheme } from './theme.js';
 
 const PALETTE = { cyan: 'var(--teal)', pink: 'var(--accent)', magenta: 'var(--accent-text)', plum: 'var(--plum)', gray: 'var(--text-subtle)' };
 const movies = [
@@ -24,13 +24,10 @@ function Poster({ movie }) { return <div className="poster" style={{ '--poster':
 function Freshness({ theatre }) { return <span className="freshness"><span className="live-dot"/> Updated {theatre.updated} · {theatre.source}</span>; }
 function Availability({ value }) { const tone = value === 'Plenty' ? 'green' : value === 'Filling fast' ? 'cyan' : 'pink'; return <span className={`availability ${tone}`}><i/> {value}</span>; }
 
-function ThemeControl({ mode, resolved }) {
-  const [open, setOpen] = useState(false);
+function ThemeControl({ resolved }) {
   useEffect(() => { const onKey = (event) => { const target = event.target; const typing = target instanceof HTMLElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName); if (!typing && event.shiftKey && event.key.toLowerCase() === 'd') { event.preventDefault(); toggleTheme(); } }; window.addEventListener('keydown', onKey); return () => window.removeEventListener('keydown', onKey); }, []);
-  useEffect(() => { const close = (event) => { if (!event.target.closest('.theme-control')) setOpen(false); }; document.addEventListener('click', close); return () => document.removeEventListener('click', close); }, []);
   const label = resolved === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
-  const options = [{ value: 'light', label: 'Light', icon: Sun }, { value: 'dark', label: 'Dark', icon: Moon }, { value: 'system', label: 'System', icon: Monitor }];
-  return <div className="theme-control"><button className="icon-button" onClick={toggleTheme} aria-label={label} aria-pressed={resolved === 'dark'} title={`${label} · Shift+D`}>{resolved === 'dark' ? <Sun size={17}/> : <Moon size={17}/>}</button><button className="icon-button theme-more" onClick={() => setOpen(!open)} aria-label="Choose theme" aria-expanded={open}>⌄</button>{open && <div className="theme-popover" role="radiogroup" aria-label="Theme mode">{options.map(({ value, label: optionLabel, icon: Icon }) => <button key={value} role="radio" aria-checked={mode === value} onClick={() => { setThemeMode(value); setOpen(false); }}><Icon size={15}/><span>{optionLabel}</span>{mode === value && <Check size={14}/>}</button>)}</div>}<span className="theme-live" aria-live="polite">{resolved} theme active</span></div>;
+  return <div className="theme-control"><button className="icon-button" onClick={toggleTheme} aria-label={label} aria-pressed={resolved === 'dark'} title={`${label} · Shift+D`}>{resolved === 'dark' ? <Sun size={17}/> : <Moon size={17}/>}</button><span className="theme-live" aria-live="polite">{resolved} theme active</span></div>;
 }
 
 function App() {
@@ -57,7 +54,7 @@ function App() {
   function toggleLike(id) { setLiked((current) => { const next = new Set(current); next.has(id) ? next.delete(id) : next.add(id); return next; }); }
   const filtered = useMemo(() => theatres.filter((theatre) => (!submittedQuery || `${theatre.name} ${theatre.area}`.toLowerCase().includes(submittedQuery.toLowerCase())) && (format === 'Any format' || theatre.formats.includes(format)) && (!verifiedOnly || theatre.source === 'Operator') && (!availableOnly || theatre.shows.some((show) => show.availability !== 'Almost full'))).sort((a, b) => sort === 'Lowest price' ? a.price - b.price : sort === 'Nearest' ? Number.parseFloat(a.distance) - Number.parseFloat(b.distance) : 0), [submittedQuery, format, verifiedOnly, availableOnly, sort]);
 
-  if (path === '/movies' || path === '/theatres' || path === '/formats' || path === '/about' || path === '/privacy' || path === '/terms' || path === '/data-transparency' || path === '/for-theatres' || path === '/portal' || path === '/alerts') return <SimplePage path={path} navigate={navigate} theme={resolved} mode={mode}/>;
+  if (path === '/movies' || path === '/theatres' || path === '/formats' || path === '/about' || path === '/privacy' || path === '/terms' || path === '/data-transparency' || path === '/for-theatres' || path === '/portal' || path === '/alerts') return <SimplePage path={path} navigate={navigate} theme={resolved}/>;
 
   return <div className="app">
     <header className="topbar"><Logo/><nav className={mobileMenu ? 'open' : ''}><button className="nav-active" onClick={() => navigate('/')}>Discover</button><button onClick={() => navigate('/movies')}>Movies</button><button onClick={() => navigate('/theatres')}>Theatres</button><button onClick={() => navigate('/formats')}>Formats</button></nav><div className="header-actions"><button className="text-control" onClick={() => notify('Kochi is your current city')}>Kochi <ChevronDown size={14}/></button><ThemeControl mode={mode} resolved={resolved}/><button className="avatar" onClick={() => navigate('/alerts')}>KS</button><button className="menu-button" onClick={() => setMobileMenu(!mobileMenu)} aria-label="Open menu"><Menu size={20}/></button></div></header>

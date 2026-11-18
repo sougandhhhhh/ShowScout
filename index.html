@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#FAF7F8" data-theme-color />
     <meta name="color-scheme" content="light dark" />
     <script>
-      (() => { try { const stored = localStorage.getItem('showscout-theme'); const mode = ['light','dark','system'].includes(stored) ? stored : 'system'; const dark = mode === 'dark' || (mode === 'system' && matchMedia('(prefers-color-scheme: dark)').matches); const theme = dark ? 'dark' : 'light'; document.documentElement.dataset.theme = theme; document.documentElement.style.colorScheme = theme; } catch { document.documentElement.dataset.theme = 'light'; } })();
+      (() => { try { const stored = localStorage.getItem('showscout-theme'); const theme = ['light','dark'].includes(stored) ? stored : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); document.documentElement.dataset.theme = theme; document.documentElement.style.colorScheme = theme; } catch { document.documentElement.dataset.theme = 'light'; } })();
     </script>
     <meta name="description" content="ShowScout compares every movie, theatre and price in Kerala." />
     <link rel="manifest" href="/manifest.webmanifest" />
