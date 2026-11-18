@@ -41,7 +41,11 @@ function createDemoTheatres() {
 // packages/providers/src/tmdb.ts
 async function fetchTmdbNowPlaying(region, apiKey, fetcher = fetch) {
   if (!apiKey) return [];
-  const response = await fetcher("https://api.themoviedb.org/3/movie/now_playing?region=IN&language=en-IN", { headers: { Authorization: `Bearer ${apiKey}` } });
+  const url = new URL("https://api.themoviedb.org/3/movie/now_playing");
+  url.searchParams.set("region", "IN");
+  url.searchParams.set("language", "en-IN");
+  url.searchParams.set("api_key", apiKey);
+  const response = await fetcher(url, { headers: { Authorization: `Bearer ${apiKey}` } });
   if (!response.ok) throw new Error(`TMDB request failed: ${response.status}`);
   const payload = await response.json();
   return (payload.results ?? []).flatMap((movie) => {
