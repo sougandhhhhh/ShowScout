@@ -1,11 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 120" role="img" aria-labelledby="title desc">
   <title id="title">ShowScout</title>
-  <desc id="desc">ShowScout cinema comparison logo with a gold film-ticket mark</desc>
-  <defs><linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f3c765"/><stop offset="1" stop-color="#c98528"/></linearGradient></defs>
+  <desc id="desc">ShowScout cinema comparison logo: a film reel inside a search lens</desc>
+  <defs><linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f5cf70"/><stop offset="1" stop-color="#c98528"/></linearGradient></defs>
   <g transform="translate(8 8)">
-    <path fill="url(#gold)" d="M52 0h48c0 12 8 20 20 20v56c-12 0-20 8-20 20H52c0-12-8-20-20-20V20C44 20 52 12 52 0Z"/>
-    <path fill="#17130d" d="M58 21h36v10H69v8h21v10H69v9h25v10H58z"/>
-    <circle cx="40" cy="28" r="4" fill="#f7e4b5"/><circle cx="40" cy="68" r="4" fill="#f7e4b5"/>
+    <circle cx="52" cy="51" r="43" fill="url(#gold)"/>
+    <circle cx="52" cy="51" r="29" fill="#17130d"/>
+    <circle cx="52" cy="51" r="8" fill="#f5cf70"/>
+    <circle cx="52" cy="31" r="6" fill="#f5cf70"/><circle cx="35" cy="61" r="6" fill="#f5cf70"/><circle cx="69" cy="61" r="6" fill="#f5cf70"/>
+    <path d="M80 80 108 108" fill="none" stroke="#f5cf70" stroke-width="12" stroke-linecap="round"/>
+    <path d="M18 9h68" fill="none" stroke="#f7e4b5" stroke-width="4" stroke-linecap="round" stroke-dasharray="3 9"/>
   </g>
   <text x="146" y="76" fill="#f8f2e8" font-family="Arial, sans-serif" font-size="57" font-weight="700" letter-spacing="-3">Show<tspan fill="#e6ae4a">Scout</tspan></text>
 </svg>
