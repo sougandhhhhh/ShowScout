@@ -18,5 +18,5 @@ export const getCompare = (params: Record<string, string | number | undefined>) 
   return request<CompareResponse>(`/compare?${query}`);
 };
 export const getMovies = () => request<{ data: Movie[] }>('/movies');
-export const getTheatres = () => request<{ data: Theatre[] }>('/theatres');
+export const getTheatres = (region = 'Ernakulam') => request<{ data: Theatre[]; meta?: { dataQuality: string; source: string; lastUpdatedAt: string }; attribution?: string }>(`/theatres?region=${encodeURIComponent(region)}`);
 export const getSuggestions = (query: string) => request<{ data: Array<{ type: string; title: string; slug: string }> }>(`/search/suggest?q=${encodeURIComponent(query)}`);

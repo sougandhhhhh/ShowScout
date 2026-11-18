@@ -6,7 +6,7 @@ import './logo.css';
 import './pwa.js';
 import { Logo } from './Logo.jsx';
 import { toggleTheme, useTheme } from './theme.js';
-import { getCompare, getMovies } from './api.ts';
+import { getCompare, getMovies, getTheatres } from './api.ts';
 import { rupees } from '@showscout/shared';
 
 const PALETTE = { cyan: 'var(--teal)', pink: 'var(--accent)', magenta: 'var(--accent-text)', plum: 'var(--plum)', gray: 'var(--text-subtle)' };
@@ -77,7 +77,8 @@ function App() {
 
   if (!knownPaths.includes(path)) return <NotFoundPage navigate={navigate}/>;
   if (path === '/movies') return <MoviesPage navigate={navigate} theme={resolved}/>;
-  if (path === '/theatres' || path === '/formats' || path === '/about' || path === '/privacy' || path === '/terms' || path === '/data-transparency' || path === '/for-theatres' || path === '/portal' || path === '/alerts') return <SimplePage path={path} navigate={navigate} theme={resolved}/>;
+  if (path === '/theatres') return <TheatresPage navigate={navigate} theme={resolved} city={city}/>;
+  if (path === '/formats' || path === '/about' || path === '/privacy' || path === '/terms' || path === '/data-transparency' || path === '/for-theatres' || path === '/portal' || path === '/alerts') return <SimplePage path={path} navigate={navigate} theme={resolved}/>;
 
   return <div className="app">
     <header className="topbar"><Logo/><nav className={mobileMenu ? 'open' : ''}><button className="nav-active" onClick={() => navigate('/')}>Discover</button><button onClick={() => navigate('/movies')}>Movies</button><button onClick={() => navigate('/theatres')}>Theatres</button><button onClick={() => navigate('/formats')}>Formats</button></nav><div className="header-actions"><CitySelector city={city} onChange={(nextCity) => { setCity(nextCity); notify(`${nextCity} selected`); }}/><ThemeControl mode={mode} resolved={resolved}/><button className="avatar" onClick={() => navigate('/alerts')}>KS</button><button className="menu-button" onClick={() => setMobileMenu(!mobileMenu)} aria-label="Open menu"><Menu size={20}/></button></div></header>
@@ -100,6 +101,14 @@ function MoviesPage({ navigate, theme = 'light' }) {
   useEffect(() => { let active = true; getMovies().then((response) => { if (active) setItems(response.data); }).catch(() => {}); return () => { active = false; }; }, []);
   const visibleMovies = items.length ? items : movies;
   return <div className={`app ${theme}`}><header className="topbar"><Logo/><nav><button onClick={() => navigate('/')}>Discover</button><button className="nav-active" onClick={() => navigate('/movies')}>Movies</button><button onClick={() => navigate('/theatres')}>Theatres</button><button onClick={() => navigate('/formats')}>Formats</button></nav><div className="header-actions"><ThemeControl resolved={theme}/><button className="back-button" onClick={() => navigate('/')}>← Back home</button></div></header><main className="simple-page"><span className="eyebrow">SHOWSCOUT / MOVIES</span><h1>Good stories, close to you.</h1><p className="simple-lede">Live movies from TMDB, refreshed for the current catalogue.</p><div className="directory-grid">{visibleMovies.map((item, index) => { const title = item.title; return <button className="directory-card" key={item.id ?? title} onClick={() => navigate('/')}><div className="directory-art" style={{ '--tile': [PALETTE.cyan, PALETTE.pink, PALETTE.magenta, PALETTE.plum][index % 4] }}>{item.posterUrl ? <img className="directory-poster" src={item.posterUrl} alt={`${title} poster`} loading="lazy"/> : <Film size={26}/>}</div><b>{title}</b><small>{item.languages?.[0] ?? 'English'} · Now showing</small><span>Compare <ArrowRight size={14}/></span></button>; })}</div></main><footer><Logo/><span>Better movie nights in Kerala.</span></footer></div>;
+}
+
+function TheatresPage({ navigate, theme = 'light', city = 'Ernakulam' }) {
+  const [selectedCity, setSelectedCity] = useState(city === 'Kochi' ? 'Ernakulam' : city);
+  const [items, setItems] = useState([]);
+  const [status, setStatus] = useState('loading');
+  useEffect(() => { let active = true; setStatus('loading'); getTheatres(selectedCity).then((response) => { if (active) { setItems(response.data); setStatus('ready'); } }).catch(() => { if (active) { setItems([]); setStatus('error'); } }); return () => { active = false; }; }, [selectedCity]);
+  return <div className={`app ${theme}`}><header className="topbar"><Logo/><nav><button onClick={() => navigate('/')}>Discover</button><button onClick={() => navigate('/movies')}>Movies</button><button className="nav-active" onClick={() => navigate('/theatres')}>Theatres</button><button onClick={() => navigate('/formats')}>Formats</button></nav><div className="header-actions"><ThemeControl resolved={theme}/><button className="back-button" onClick={() => navigate('/')}>← Back home</button></div></header><main className="simple-page"><span className="eyebrow">SHOWSCOUT / THEATRES</span><h1>Screens across Kerala.</h1><p className="simple-lede">Open cinema directory data for the district you choose. Live shows and prices appear when a theatre or ticketing partner provides them.</p><label className="directory-select">District <select value={selectedCity} onChange={(event) => setSelectedCity(event.target.value)}>{districts.map((district) => <option key={district}>{district === 'Kochi' ? 'Ernakulam' : district}</option>)}</select></label>{status === 'loading' && <p className="directory-note">Finding cinemas near {selectedCity}…</p>}{status === 'error' && <p className="directory-note">The directory is temporarily unavailable. Try again shortly.</p>}{status === 'ready' && !items.length && <p className="directory-note">No mapped cinemas found for {selectedCity} yet.</p>}<div className="directory-grid">{items.map((item, index) => <a className="directory-card" key={item.id} href={`https://www.openstreetmap.org/?mlat=${item.lat}&mlon=${item.lng}#map=17/${item.lat}/${item.lng}`} target="_blank" rel="noreferrer"><div className="directory-art" style={{ '--tile': [PALETTE.cyan, PALETTE.pink, PALETTE.magenta, PALETTE.plum][index % 4] }}><Film size={26}/></div><b>{item.name}</b><small>{item.address}</small><span>View map <ArrowRight size={14}/></span></a>)}</div><p className="directory-attribution">© OpenStreetMap contributors · Directory refreshed on request</p></main><footer><Logo/><span>Better movie nights in Kerala.</span></footer></div>;
 }
 
 createRoot(document.getElementById('root')).render(<App/>);

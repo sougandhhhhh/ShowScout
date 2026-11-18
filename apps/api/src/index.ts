@@ -3,8 +3,9 @@ import { cors } from 'hono/cors';
 import { bodyLimit } from 'hono/body-limit';
 import { streamSSE } from 'hono/streaming';
 import { AlertSchema, CompareQuerySchema, CommunityReportSchema, CsvImportSchema, OperatorFeedSchema, OperatorLoginSchema, OperatorSignupSchema, TheatreClaimSchema } from '../../../packages/shared/src/index';
+import type { Region } from '../../../packages/shared/src/index';
 import { createDemoTheatres, demoMovies, demoRegion } from '../../../packages/providers/src/demo';
-import { fetchTmdbNowPlaying } from '../../../packages/providers/src/index';
+import { fetchOsmCinemas, fetchTmdbNowPlaying } from '../../../packages/providers/src/index';
 import { sortTheatres, valueScore } from '../../../packages/scoring/src/index';
 
 const app = new Hono().basePath('/api/v1');
@@ -19,6 +20,12 @@ const operators: Array<{ id: string; email: string; passwordHash: string; theatr
 const sessions = new Map<string, { operatorId: string; expiresAt: number }>();
 const rateBuckets = new Map<string, { count: number; resetAt: number }>();
 const tmdbApiKey = typeof process !== 'undefined' ? process.env.TMDB_API_KEY ?? '' : '';
+const keralaRegions: Region[] = [
+  ['Alappuzha', 9.4981, 76.3388], ['Ernakulam', 9.9816, 76.2999], ['Idukki', 9.9189, 77.1025], ['Kannur', 11.8745, 75.3704], ['Kasaragod', 12.4996, 74.9869], ['Kollam', 8.8932, 76.6141], ['Kottayam', 9.5916, 76.5222], ['Kozhikode', 11.2588, 75.7804], ['Malappuram', 11.051, 76.0711], ['Palakkad', 10.7867, 76.6548], ['Pathanamthitta', 9.2648, 76.787], ['Thiruvananthapuram', 8.5241, 76.9366], ['Thrissur', 10.5276, 76.2144], ['Wayanad', 11.6854, 76.132],
+].map(([district, lat, lng]) => ({ id: `reg-${String(district).toLowerCase()}`, state: 'Kerala', district: String(district), city: String(district), slug: String(district).toLowerCase().replaceAll(' ', '-'), lat: Number(lat), lng: Number(lng), isActive: true }));
+const theatreCache = new Map<string, { theatres: Awaited<ReturnType<typeof fetchOsmCinemas>>; expiresAt: number }>();
+function regionFor(value: string | undefined) { const normalized = (value ?? 'Ernakulam').toLowerCase().replaceAll(' ', '-'); return keralaRegions.find((region) => region.slug === normalized || region.district.toLowerCase() === value?.toLowerCase()) ?? demoRegion; }
+async function directoryTheatres(region: Region) { const cached = theatreCache.get(region.slug); if (cached && cached.expiresAt > Date.now()) return cached.theatres; try { const theatres = await fetchOsmCinemas(region); theatreCache.set(region.slug, { theatres, expiresAt: Date.now() + 15 * 60_000 }); return theatres; } catch { return []; } }
 async function catalogMovies() { if (!tmdbApiKey) return { movies: demoMovies, dataQuality: 'demo', source: 'demo' }; try { const movies = await fetchTmdbNowPlaying(demoRegion, tmdbApiKey); return { movies: movies.length ? movies : demoMovies, dataQuality: movies.length ? 'live' : 'demo', source: movies.length ? 'tmdb' : 'demo' }; } catch { return { movies: demoMovies, dataQuality: 'demo', source: 'demo' }; } }
 const requestId = () => crypto.randomUUID();
 const base64 = (bytes: Uint8Array) => btoa(String.fromCharCode(...bytes));
@@ -31,10 +38,10 @@ function session(c: any) { const token = (c.req.header('Authorization') ?? '').r
 app.onError((error, c) => { const isValidation = error instanceof SyntaxError || error.name === 'ZodError'; return jsonError(c, isValidation ? 'VALIDATION_ERROR' : 'INTERNAL_ERROR', isValidation ? 'Request payload is invalid' : 'Unexpected server error', isValidation ? 400 : 500); });
 app.notFound((c) => jsonError(c, 'NOT_FOUND', 'Route not found', 404));
 app.get('/health', (c) => c.json({ ok: true, service: 'showscout-api', timestamp: new Date().toISOString() }));
-app.get('/regions', (c) => c.json({ data: [demoRegion], attribution: 'ShowScout demo dataset' }));
+app.get('/regions', (c) => c.json({ data: keralaRegions, attribution: '© OpenStreetMap contributors' }));
 app.get('/movies', async (c) => { const catalog = await catalogMovies(); return c.json({ data: catalog.movies, meta: { dataQuality: catalog.dataQuality, source: catalog.source, lastUpdatedAt: new Date().toISOString() } }); });
 app.get('/movies/:slug', (c) => { const movie = demoMovies.find((item) => item.slug === c.req.param('slug')); return movie ? c.json({ data: movie }) : c.json({ error: { code: 'NOT_FOUND', message: 'Movie not found' } }, 404); });
-app.get('/theatres', (c) => c.json({ data: createDemoTheatres() }));
+app.get('/theatres', async (c) => { const region = regionFor(c.req.query('region') ?? c.req.query('district')); const theatres = await directoryTheatres(region); return c.json({ data: theatres, region, meta: { dataQuality: 'directory', source: 'openstreetmap', lastUpdatedAt: new Date().toISOString() }, attribution: '© OpenStreetMap contributors' }); });
 app.get('/theatres/:slug', (c) => { const theatre = createDemoTheatres().find((item) => item.slug === c.req.param('slug')); return theatre ? c.json({ data: theatre }) : c.json({ error: { code: 'NOT_FOUND', message: 'Theatre not found' } }, 404); });
 app.get('/compare', (c) => {
   const query = CompareQuerySchema.parse(c.req.query());

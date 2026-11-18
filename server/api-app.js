@@ -38,6 +38,20 @@ function createDemoTheatres() {
   return names.map((name, index) => TheatreSchema.parse({ id: `thr-${index + 1}`, name, slug: name.toLowerCase().replaceAll(" ", "-"), address: `${index % 2 ? "MG Road" : "Edappally"}, Kochi, Kerala`, regionId: demoRegion.id, lat: demoRegion.lat + index * 6e-3, lng: demoRegion.lng + index * 5e-3, rating: 4.1 + index % 5 / 10, formats: index % 2 ? ["2D", "Dolby Atmos"] : ["2D", "Laser projection"], facilities: ["Parking", "F&B", index % 2 ? "Wheelchair access" : "Recliner"], verified: index !== 2, dataQuality: "demo", source: "demo", lastUpdatedAt: updated, shows: [10, 13, 16, 19].flatMap((hour, showIndex) => demoMovies.slice(0, 2).map((movie, movieIndex) => ({ id: `show-${index}-${showIndex}-${movieIndex}`, movieId: movie.id, theatreId: `thr-${index + 1}`, startsAt: `${kolkataDate}T${String(hour).padStart(2, "0")}:15:00+05:30`, format: index % 2 ? "2D" : "Laser projection", language: movie.languages[0], status: showIndex === 3 ? "fast_filling" : "selling", priceFromPaise: (120 + index * 20 + showIndex * 10 + movieIndex * 20) * 100, availableSeats: 24 + (index + 1) * 13 % 70, source: "demo", lastUpdatedAt: updated, dataQuality: "demo" }))) }));
 }
 
+// packages/providers/src/osm.ts
+async function fetchOsmCinemas(region, fetcher = fetch) {
+  const query = `[out:json][timeout:20];nwr[amenity=cinema](${region.lat - 0.35},${region.lng - 0.35},${region.lat + 0.35},${region.lng + 0.35});out center tags;`;
+  const response = await fetcher("https://overpass-api.de/api/interpreter", { method: "POST", body: query, headers: { "content-type": "text/plain", "user-agent": "ShowScout/0.1 (cinema directory; contact via repository)" } });
+  if (!response.ok) throw new Error(`OSM Overpass failed: ${response.status}`);
+  const payload = await response.json();
+  return (payload.elements ?? []).flatMap((element) => {
+    const tags = element.tags;
+    if (!tags?.name) return [];
+    const parsed = TheatreSchema.safeParse({ id: `osm-${element.id}`, name: tags.name, slug: tags.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"), address: tags["addr:street"] ?? tags["addr:city"] ?? "Address not provided", regionId: region.id, lat: element.lat ?? region.lat, lng: element.lon ?? region.lng, rating: 0, formats: [], facilities: [], verified: false, dataQuality: "directory", source: "openstreetmap", lastUpdatedAt: (/* @__PURE__ */ new Date()).toISOString(), shows: [] });
+    return parsed.success ? [parsed.data] : [];
+  });
+}
+
 // packages/providers/src/tmdb.ts
 async function fetchTmdbNowPlaying(region, apiKey, fetcher = fetch) {
   if (!apiKey) return [];
@@ -94,6 +108,38 @@ var operators = [];
 var sessions = /* @__PURE__ */ new Map();
 var rateBuckets = /* @__PURE__ */ new Map();
 var tmdbApiKey = typeof process !== "undefined" ? process.env.TMDB_API_KEY ?? "" : "";
+var keralaRegions = [
+  ["Alappuzha", 9.4981, 76.3388],
+  ["Ernakulam", 9.9816, 76.2999],
+  ["Idukki", 9.9189, 77.1025],
+  ["Kannur", 11.8745, 75.3704],
+  ["Kasaragod", 12.4996, 74.9869],
+  ["Kollam", 8.8932, 76.6141],
+  ["Kottayam", 9.5916, 76.5222],
+  ["Kozhikode", 11.2588, 75.7804],
+  ["Malappuram", 11.051, 76.0711],
+  ["Palakkad", 10.7867, 76.6548],
+  ["Pathanamthitta", 9.2648, 76.787],
+  ["Thiruvananthapuram", 8.5241, 76.9366],
+  ["Thrissur", 10.5276, 76.2144],
+  ["Wayanad", 11.6854, 76.132]
+].map(([district, lat, lng]) => ({ id: `reg-${String(district).toLowerCase()}`, state: "Kerala", district: String(district), city: String(district), slug: String(district).toLowerCase().replaceAll(" ", "-"), lat: Number(lat), lng: Number(lng), isActive: true }));
+var theatreCache = /* @__PURE__ */ new Map();
+function regionFor(value) {
+  const normalized = (value ?? "Ernakulam").toLowerCase().replaceAll(" ", "-");
+  return keralaRegions.find((region) => region.slug === normalized || region.district.toLowerCase() === value?.toLowerCase()) ?? demoRegion;
+}
+async function directoryTheatres(region) {
+  const cached = theatreCache.get(region.slug);
+  if (cached && cached.expiresAt > Date.now()) return cached.theatres;
+  try {
+    const theatres = await fetchOsmCinemas(region);
+    theatreCache.set(region.slug, { theatres, expiresAt: Date.now() + 15 * 6e4 });
+    return theatres;
+  } catch {
+    return [];
+  }
+}
 async function catalogMovies() {
   if (!tmdbApiKey) return { movies: demoMovies, dataQuality: "demo", source: "demo" };
   try {
@@ -149,7 +195,7 @@ app.onError((error, c) => {
 });
 app.notFound((c) => jsonError(c, "NOT_FOUND", "Route not found", 404));
 app.get("/health", (c) => c.json({ ok: true, service: "showscout-api", timestamp: (/* @__PURE__ */ new Date()).toISOString() }));
-app.get("/regions", (c) => c.json({ data: [demoRegion], attribution: "ShowScout demo dataset" }));
+app.get("/regions", (c) => c.json({ data: keralaRegions, attribution: "\xA9 OpenStreetMap contributors" }));
 app.get("/movies", async (c) => {
   const catalog = await catalogMovies();
   return c.json({ data: catalog.movies, meta: { dataQuality: catalog.dataQuality, source: catalog.source, lastUpdatedAt: (/* @__PURE__ */ new Date()).toISOString() } });
@@ -158,7 +204,11 @@ app.get("/movies/:slug", (c) => {
   const movie = demoMovies.find((item) => item.slug === c.req.param("slug"));
   return movie ? c.json({ data: movie }) : c.json({ error: { code: "NOT_FOUND", message: "Movie not found" } }, 404);
 });
-app.get("/theatres", (c) => c.json({ data: createDemoTheatres() }));
+app.get("/theatres", async (c) => {
+  const region = regionFor(c.req.query("region") ?? c.req.query("district"));
+  const theatres = await directoryTheatres(region);
+  return c.json({ data: theatres, region, meta: { dataQuality: "directory", source: "openstreetmap", lastUpdatedAt: (/* @__PURE__ */ new Date()).toISOString() }, attribution: "\xA9 OpenStreetMap contributors" });
+});
 app.get("/theatres/:slug", (c) => {
   const theatre = createDemoTheatres().find((item) => item.slug === c.req.param("slug"));
   return theatre ? c.json({ data: theatre }) : c.json({ error: { code: "NOT_FOUND", message: "Theatre not found" } }, 404);
