@@ -1,5 +1,5 @@
-import type { Movie, Region } from '../../shared/src/index.ts';
-import { MovieSchema } from '../../shared/src/index.ts';
+import type { Movie, Region } from '../../shared/src/index';
+import { MovieSchema } from '../../shared/src/index';
 
 export async function fetchTmdbNowPlaying(region: Region, apiKey: string, fetcher: typeof fetch = fetch): Promise<Movie[]> {
   if (!apiKey) return [];

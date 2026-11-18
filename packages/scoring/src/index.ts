@@ -1,4 +1,4 @@
-import type { Theatre } from '../../shared/src/index.ts';
+import type { Theatre } from '../../shared/src/index';
 
 export function valueScore(theatre: Theatre): number {
   const cheapest = theatre.shows.length ? Math.min(...theatre.shows.map((show) => show.priceFromPaise)) : 60000;

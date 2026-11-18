@@ -1,5 +1,5 @@
-import type { Region, Theatre } from '../../shared/src/index.ts';
-import { TheatreSchema } from '../../shared/src/index.ts';
+import type { Region, Theatre } from '../../shared/src/index';
+import { TheatreSchema } from '../../shared/src/index';
 
 type OsmElement = { id: number; lat?: number; lon?: number; tags?: Record<string, string> };
 export async function fetchOsmCinemas(region: Region, fetcher: typeof fetch = fetch): Promise<Theatre[]> {

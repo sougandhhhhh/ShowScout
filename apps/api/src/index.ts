@@ -2,10 +2,10 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { bodyLimit } from 'hono/body-limit';
 import { streamSSE } from 'hono/streaming';
-import { AlertSchema, CompareQuerySchema, CommunityReportSchema, CsvImportSchema, OperatorFeedSchema, OperatorLoginSchema, OperatorSignupSchema, TheatreClaimSchema } from '../../../packages/shared/src/index.ts';
-import { createDemoTheatres, demoMovies, demoRegion } from '../../../packages/providers/src/demo.ts';
-import { fetchTmdbNowPlaying } from '../../../packages/providers/src/index.ts';
-import { sortTheatres, valueScore } from '../../../packages/scoring/src/index.ts';
+import { AlertSchema, CompareQuerySchema, CommunityReportSchema, CsvImportSchema, OperatorFeedSchema, OperatorLoginSchema, OperatorSignupSchema, TheatreClaimSchema } from '../../../packages/shared/src/index';
+import { createDemoTheatres, demoMovies, demoRegion } from '../../../packages/providers/src/demo';
+import { fetchTmdbNowPlaying } from '../../../packages/providers/src/index';
+import { sortTheatres, valueScore } from '../../../packages/scoring/src/index';
 
 const app = new Hono().basePath('/api/v1');
 const allowedOrigins = ((typeof process !== 'undefined' ? process.env.ALLOWED_ORIGINS : '') || 'http://localhost:5173,http://localhost:4173').split(',').map((value: string) => value.trim()).filter(Boolean);
