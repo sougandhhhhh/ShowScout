@@ -8,3 +8,5 @@ apps/api/dist/
 .DS_Store
 coverage/
 *.log
+
+.vercel
