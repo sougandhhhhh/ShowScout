@@ -1,6 +1,7 @@
 name = "showscout-api"
-main = "apps/api/src/index.ts"
+main = "apps/api/src/worker.ts"
 compatibility_date = "2026-11-18"
+compatibility_flags = []
 
 [vars]
 DEMO_MODE = "true"

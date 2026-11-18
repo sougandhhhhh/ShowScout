@@ -6,7 +6,7 @@
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
     "dev": "vite",
-    "dev:api": "tsx apps/api/src/index.ts",
+    "dev:api": "tsx apps/api/src/dev.ts",
     "build": "vite build",
     "build:api": "tsc -p apps/api/tsconfig.json",
     "preview": "vite preview",

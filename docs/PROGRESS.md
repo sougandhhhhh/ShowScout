@@ -1,5 +1,13 @@
 # Delivery progress
 
+## Prompt rebuild status
+
+- [x] Shared demo catalog includes four movies with request-time Asia/Kolkata showtimes.
+- [x] Compare rejects unknown movies, applies date/language/format/max-price filters, and returns value scores.
+- [x] Provider adapters use safe parsing, TMDB bearer auth, OSM directory quality, and descriptive attribution headers.
+- [x] API sessions use salted PBKDF2 hashes with expiry, logout, ownership checks, rate limits, generic 500 errors, and restricted CORS.
+- [ ] Frontend API client, route-level pages, full map, persistence, and production provider credentials remain in progress.
+
 ## Phase 0 — Foundation
 
 - [x] Vite React public web experience

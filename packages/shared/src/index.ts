@@ -1,13 +1,13 @@
 import { z } from 'zod';
 
-export const DataQuality = z.enum(['live', 'operator_reported', 'community_reported', 'demo', 'unavailable']);
+export const DataQuality = z.enum(['live', 'directory', 'operator_reported', 'community_reported', 'demo', 'unavailable']);
 export type DataQuality = z.infer<typeof DataQuality>;
 export const ShowStatus = z.enum(['scheduled', 'selling', 'fast_filling', 'sold_out', 'cancelled']);
 export type ShowStatus = z.infer<typeof ShowStatus>;
 
 export const RegionSchema = z.object({ id: z.string(), state: z.string(), district: z.string(), city: z.string(), slug: z.string(), lat: z.number(), lng: z.number(), isActive: z.boolean() });
 export type Region = z.infer<typeof RegionSchema>;
-export const MovieSchema = z.object({ id: z.string(), title: z.string(), slug: z.string(), synopsis: z.string(), runtimeMinutes: z.number().int().positive(), certification: z.enum(['U', 'UA', 'A']), languages: z.array(z.string()), genres: z.array(z.string()), posterUrl: z.string().url().optional(), status: z.enum(['now_showing', 'upcoming', 'ended']), dataQuality: DataQuality, source: z.string(), lastUpdatedAt: z.string() });
+export const MovieSchema = z.object({ id: z.string(), title: z.string(), slug: z.string(), synopsis: z.string(), runtimeMinutes: z.number().int().positive().nullable().optional(), certification: z.enum(['U', 'UA', 'A']), languages: z.array(z.string()), genres: z.array(z.string()), posterUrl: z.string().url().optional(), status: z.enum(['now_showing', 'upcoming', 'ended']), dataQuality: DataQuality, source: z.string(), lastUpdatedAt: z.string() });
 export type Movie = z.infer<typeof MovieSchema>;
 export const ShowSchema = z.object({ id: z.string(), movieId: z.string(), theatreId: z.string(), startsAt: z.string(), format: z.string(), language: z.string(), status: ShowStatus, priceFromPaise: z.number().int().nonnegative(), availableSeats: z.number().int().nonnegative().nullable(), source: z.string(), lastUpdatedAt: z.string(), dataQuality: DataQuality });
 export type Show = z.infer<typeof ShowSchema>;
