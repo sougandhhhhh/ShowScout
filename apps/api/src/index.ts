@@ -4,6 +4,7 @@ import { bodyLimit } from 'hono/body-limit';
 import { streamSSE } from 'hono/streaming';
 import { AlertSchema, CompareQuerySchema, CommunityReportSchema, CsvImportSchema, OperatorFeedSchema, OperatorLoginSchema, OperatorSignupSchema, TheatreClaimSchema } from '@showscout/shared';
 import { createDemoTheatres, demoMovies, demoRegion } from '@showscout/providers/demo';
+import { fetchTmdbNowPlaying } from '@showscout/providers';
 import { sortTheatres, valueScore } from '@showscout/scoring';
 
 const app = new Hono().basePath('/api/v1');
@@ -17,6 +18,8 @@ const claims: Array<{ id: string; theatreId: string; operatorName: string; email
 const operators: Array<{ id: string; email: string; passwordHash: string; theatreId: string; claimVerified: boolean }> = [];
 const sessions = new Map<string, { operatorId: string; expiresAt: number }>();
 const rateBuckets = new Map<string, { count: number; resetAt: number }>();
+const tmdbApiKey = typeof process !== 'undefined' ? process.env.TMDB_API_KEY ?? '' : '';
+async function catalogMovies() { if (!tmdbApiKey) return { movies: demoMovies, dataQuality: 'demo', source: 'demo' }; try { const movies = await fetchTmdbNowPlaying(demoRegion, tmdbApiKey); return { movies: movies.length ? movies : demoMovies, dataQuality: movies.length ? 'live' : 'demo', source: movies.length ? 'tmdb' : 'demo' }; } catch { return { movies: demoMovies, dataQuality: 'demo', source: 'demo' }; } }
 const requestId = () => crypto.randomUUID();
 const base64 = (bytes: Uint8Array) => btoa(String.fromCharCode(...bytes));
 const fromBase64 = (value: string) => Uint8Array.from(atob(value), (character) => character.charCodeAt(0));
@@ -29,7 +32,7 @@ app.onError((error, c) => { const isValidation = error instanceof SyntaxError ||
 app.notFound((c) => jsonError(c, 'NOT_FOUND', 'Route not found', 404));
 app.get('/health', (c) => c.json({ ok: true, service: 'showscout-api', timestamp: new Date().toISOString() }));
 app.get('/regions', (c) => c.json({ data: [demoRegion], attribution: 'ShowScout demo dataset' }));
-app.get('/movies', (c) => c.json({ data: demoMovies }));
+app.get('/movies', async (c) => { const catalog = await catalogMovies(); return c.json({ data: catalog.movies, meta: { dataQuality: catalog.dataQuality, source: catalog.source, lastUpdatedAt: new Date().toISOString() } }); });
 app.get('/movies/:slug', (c) => { const movie = demoMovies.find((item) => item.slug === c.req.param('slug')); return movie ? c.json({ data: movie }) : c.json({ error: { code: 'NOT_FOUND', message: 'Movie not found' } }, 404); });
 app.get('/theatres', (c) => c.json({ data: createDemoTheatres() }));
 app.get('/theatres/:slug', (c) => { const theatre = createDemoTheatres().find((item) => item.slug === c.req.param('slug')); return theatre ? c.json({ data: theatre }) : c.json({ error: { code: 'NOT_FOUND', message: 'Theatre not found' } }, 404); });
