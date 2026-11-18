@@ -8,6 +8,7 @@
     "dev": "vite",
     "dev:api": "tsx apps/api/src/dev.ts",
     "build": "vite build",
+    "build:api:function": "esbuild apps/api/src/index.ts --bundle --platform=node --format=esm --outfile=api/v1/app.js --packages=external",
     "build:api": "tsc -p apps/api/tsconfig.json",
     "preview": "vite preview",
     "seed": "tsx scripts/seed.ts",
