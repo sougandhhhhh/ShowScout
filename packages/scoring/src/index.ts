@@ -10,9 +10,10 @@ export function valueScore(theatre: Theatre): number {
   return Math.round((price * 0.4 + quality * 0.25 + Math.min(availability, 1) * 0.2 + freshness * 0.15) * 100);
 }
 
-export function sortTheatres(theatres: Theatre[], sort: string): Theatre[] {
+export function sortTheatres(theatres: Theatre[], sort: string, origin?: { lat: number; lng: number }): Theatre[] {
   const cheapest = (theatre: Theatre) => theatre.shows.length ? Math.min(...theatre.shows.map((show) => show.priceFromPaise)) : Number.POSITIVE_INFINITY;
   const availability = (theatre: Theatre) => theatre.shows.reduce((sum, show) => sum + (show.availableSeats ?? 0), 0);
   const earliest = (theatre: Theatre) => theatre.shows.length ? Math.min(...theatre.shows.map((show) => new Date(show.startsAt).getTime())) : Number.POSITIVE_INFINITY;
-  return [...theatres].sort((a, b) => sort === 'lowest_price' ? cheapest(a) - cheapest(b) : sort === 'most_available' ? availability(b) - availability(a) : sort === 'earliest' ? earliest(a) - earliest(b) : valueScore(b) - valueScore(a));
+  const distance = (theatre: Theatre) => origin ? Math.hypot(theatre.lat - origin.lat, theatre.lng - origin.lng) : Number.POSITIVE_INFINITY;
+  return [...theatres].sort((a, b) => sort === 'lowest_price' ? cheapest(a) - cheapest(b) : sort === 'most_available' ? availability(b) - availability(a) : sort === 'earliest' ? earliest(a) - earliest(b) : sort === 'nearest' ? distance(a) - distance(b) : valueScore(b) - valueScore(a));
 }

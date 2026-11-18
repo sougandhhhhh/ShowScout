@@ -40,7 +40,7 @@ app.get('/compare', (c) => {
   const theatres = sortTheatres(createDemoTheatres().map((theatre) => ({
     ...theatre,
     shows: theatre.shows.filter((show) => show.movieId === movie.id && (!query.date || show.startsAt.slice(0, 10) === query.date) && (!query.language || show.language === query.language) && (!query.format || show.format === query.format) && (!query.maxPrice || show.priceFromPaise <= query.maxPrice)),
-  })), query.sort).map((theatre) => ({ ...theatre, valueScore: valueScore(theatre) }));
+  })), query.sort, query.lat != null && query.lng != null ? { lat: query.lat, lng: query.lng } : undefined).map((theatre) => ({ ...theatre, valueScore: valueScore(theatre) }));
   return c.json({ data: { movie, region: demoRegion, theatres }, meta: { dataQuality: 'demo', source: 'demo', lastUpdatedAt: new Date().toISOString() } });
 });
 app.get('/search/suggest', (c) => { const q = (c.req.query('q') ?? '').trim().toLowerCase(); const movies = demoMovies.filter((movie) => movie.title.toLowerCase().includes(q)).map((movie) => ({ type: 'movie', title: movie.title, slug: movie.slug })); const theatres = createDemoTheatres().filter((theatre) => theatre.name.toLowerCase().includes(q)).map((theatre) => ({ type: 'theatre', title: theatre.name, slug: theatre.slug })); return c.json({ data: [...movies, ...theatres].slice(0, 8) }); });

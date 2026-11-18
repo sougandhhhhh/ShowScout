@@ -13,7 +13,7 @@ export const ShowSchema = z.object({ id: z.string(), movieId: z.string(), theatr
 export type Show = z.infer<typeof ShowSchema>;
 export const TheatreSchema = z.object({ id: z.string(), name: z.string(), slug: z.string(), address: z.string(), regionId: z.string(), lat: z.number(), lng: z.number(), rating: z.number().min(0).max(5), formats: z.array(z.string()), facilities: z.array(z.string()), verified: z.boolean(), dataQuality: DataQuality, source: z.string(), lastUpdatedAt: z.string(), shows: z.array(ShowSchema) });
 export type Theatre = z.infer<typeof TheatreSchema>;
-export const CompareQuerySchema = z.object({ movie: z.string().default('rekhachithram'), region: z.string().default('kochi'), date: z.string().optional(), sort: z.enum(['best_value', 'lowest_price', 'nearest', 'earliest', 'most_available']).default('best_value'), language: z.string().optional(), format: z.string().optional(), maxPrice: z.coerce.number().optional() });
+export const CompareQuerySchema = z.object({ movie: z.string().default('rekhachithram'), region: z.string().default('kochi'), date: z.string().optional(), sort: z.enum(['best_value', 'lowest_price', 'nearest', 'earliest', 'most_available']).default('best_value'), language: z.string().optional(), format: z.string().optional(), maxPrice: z.coerce.number().optional(), lat: z.coerce.number().optional(), lng: z.coerce.number().optional() });
 export type CompareQuery = z.infer<typeof CompareQuerySchema>;
 
 export const OperatorShowInputSchema = z.object({ movieId: z.string(), startsAt: z.string().datetime(), format: z.string().min(1), language: z.string().min(1), priceFromPaise: z.number().int().nonnegative(), availableSeats: z.number().int().nonnegative().nullable().default(null) });
