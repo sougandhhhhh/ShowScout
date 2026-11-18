@@ -1,6 +1,6 @@
 import type { Movie, Region, Theatre } from '@showscout/shared';
 
-const baseUrl = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, '') ?? '/api/v1';
+const baseUrl = (import.meta.env.VITE as string | undefined)?.replace(/\/$/, '') ?? '/api/v1';
 
 export type CompareResponse = {
   data: { movie: Movie; region: Region; theatres: Array<Theatre & { valueScore: number }> };

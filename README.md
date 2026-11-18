@@ -37,7 +37,7 @@ Live URL: configure `SHOWSCOUT_PUBLIC_URL` for deployment; `https://showscout.ex
 
 | Variable | Purpose |
 | --- | --- |
-| `VITE_API_BASE_URL` | Browser API base URL |
+| `VITE` | Browser API base URL |
 | `ALLOWED_ORIGINS` | Comma-separated API CORS allowlist |
 | `TMDB_API_KEY` | Optional TMDB bearer credential |
 | `SHOWSCOUT_PUBLIC_URL` | Public URL used by deployment tooling |
