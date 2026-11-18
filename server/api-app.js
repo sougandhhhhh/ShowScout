@@ -9,7 +9,7 @@ import { z } from "zod";
 var DataQuality = z.enum(["live", "directory", "operator_reported", "community_reported", "demo", "unavailable"]);
 var ShowStatus = z.enum(["scheduled", "selling", "fast_filling", "sold_out", "cancelled"]);
 var RegionSchema = z.object({ id: z.string(), state: z.string(), district: z.string(), city: z.string(), slug: z.string(), lat: z.number(), lng: z.number(), isActive: z.boolean() });
-var MovieSchema = z.object({ id: z.string(), title: z.string(), slug: z.string(), synopsis: z.string(), runtimeMinutes: z.number().int().positive().nullable().optional(), certification: z.enum(["U", "UA", "A"]), languages: z.array(z.string()), genres: z.array(z.string()), posterUrl: z.string().url().optional(), status: z.enum(["now_showing", "upcoming", "ended"]), dataQuality: DataQuality, source: z.string(), lastUpdatedAt: z.string() });
+var MovieSchema = z.object({ id: z.string(), title: z.string(), slug: z.string(), synopsis: z.string(), runtimeMinutes: z.number().int().positive().nullable().optional(), certification: z.enum(["U", "UA", "A"]), languages: z.array(z.string()), genres: z.array(z.string()), posterUrl: z.string().url().optional(), releaseDate: z.string().optional(), popularity: z.number().nonnegative().optional(), voteAverage: z.number().min(0).max(10).optional(), voteCount: z.number().int().nonnegative().optional(), status: z.enum(["now_showing", "upcoming", "ended"]), dataQuality: DataQuality, source: z.string(), lastUpdatedAt: z.string() });
 var ShowSchema = z.object({ id: z.string(), movieId: z.string(), theatreId: z.string(), startsAt: z.string(), format: z.string(), language: z.string(), status: ShowStatus, priceFromPaise: z.number().int().nonnegative(), availableSeats: z.number().int().nonnegative().nullable(), source: z.string(), lastUpdatedAt: z.string(), dataQuality: DataQuality });
 var TheatreSchema = z.object({ id: z.string(), name: z.string(), slug: z.string(), address: z.string(), regionId: z.string(), lat: z.number(), lng: z.number(), rating: z.number().min(0).max(5), formats: z.array(z.string()), facilities: z.array(z.string()), verified: z.boolean(), dataQuality: DataQuality, source: z.string(), lastUpdatedAt: z.string(), shows: z.array(ShowSchema) });
 var CompareQuerySchema = z.object({ movie: z.string().default("rekhachithram"), region: z.string().default("kochi"), date: z.string().optional(), sort: z.enum(["best_value", "lowest_price", "nearest", "earliest", "most_available"]).default("best_value"), language: z.string().optional(), format: z.string().optional(), maxPrice: z.coerce.number().optional(), lat: z.coerce.number().optional(), lng: z.coerce.number().optional() });
@@ -50,12 +50,12 @@ async function fetchTmdbNowPlaying(region, apiKey, fetcher = fetch) {
   const payload = await response.json();
   return (payload.results ?? []).flatMap((movie) => {
     try {
-      const parsed = MovieSchema.safeParse({ id: `tmdb-${movie.id}`, title: movie.title, slug: movie.title.toLowerCase().replace(/[^a-z0-9]+/g, "-"), synopsis: movie.overview || "Not available", runtimeMinutes: null, certification: "UA", languages: ["English"], genres: [], posterUrl: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : void 0, status: "now_showing", dataQuality: "live", source: "tmdb", lastUpdatedAt: (/* @__PURE__ */ new Date()).toISOString() });
+      const parsed = MovieSchema.safeParse({ id: `tmdb-${movie.id}`, title: movie.title, slug: movie.title.toLowerCase().replace(/[^a-z0-9]+/g, "-"), synopsis: movie.overview || "Not available", runtimeMinutes: null, certification: "UA", languages: ["English"], genres: [], posterUrl: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : void 0, releaseDate: movie.release_date || void 0, popularity: movie.popularity ?? 0, voteAverage: movie.vote_average ?? 0, voteCount: movie.vote_count ?? 0, status: "now_showing", dataQuality: "live", source: "tmdb", lastUpdatedAt: (/* @__PURE__ */ new Date()).toISOString() });
       return parsed.success ? [parsed.data] : [];
     } catch {
       return [];
     }
-  });
+  }).sort((a, b) => (b.popularity ?? 0) - (a.popularity ?? 0) || (b.voteAverage ?? 0) - (a.voteAverage ?? 0) || (b.releaseDate ?? "").localeCompare(a.releaseDate ?? ""));
 }
 
 // packages/scoring/src/index.ts
