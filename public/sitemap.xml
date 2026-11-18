@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://showscout.example/</loc></url>
+  <url><loc>https://showscout.example/movies</loc></url>
+  <url><loc>https://showscout.example/theatres</loc></url>
+  <url><loc>https://showscout.example/formats</loc></url>
+  <url><loc>https://showscout.example/data-transparency</loc></url>
+  <url><loc>https://showscout.example/for-theatres</loc></url>
+</urlset>

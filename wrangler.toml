@@ -1,0 +1,13 @@
+name = "showscout-api"
+main = "apps/api/src/index.ts"
+compatibility_date = "2026-11-18"
+
+[vars]
+DEMO_MODE = "true"
+
+# Production bindings are intentionally opt-in. Add D1/KV/R2 IDs after creating
+# free-tier resources; demo mode remains the safe local default.
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "showscout"
+# database_id = "replace-me"

@@ -1,0 +1,1 @@
+INSERT OR IGNORE INTO regions (id,state,district,city,slug,lat,lng,is_active,created_at,updated_at) VALUES ('reg-kochi','Kerala','Ernakulam','Kochi','kochi',9.9312,76.2673,1,datetime('now'),datetime('now'));

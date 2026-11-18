@@ -1,0 +1,28 @@
+{
+  "name": "showscout",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev": "vite",
+    "dev:api": "tsx apps/api/src/index.ts",
+    "build": "vite build",
+    "build:api": "tsc -p apps/api/tsconfig.json",
+    "preview": "vite preview",
+    "seed": "tsx scripts/seed.ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "vite": "latest",
+    "typescript": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "lucide-react": "latest",
+    "hono": "latest",
+    "@hono/node-server": "latest",
+    "zod": "latest"
+  },
+  "devDependencies": { "tsx": "latest", "vitest": "latest", "@types/node": "latest" }
+}
