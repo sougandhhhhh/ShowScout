@@ -36,12 +36,13 @@ function App() {
   const [availableOnly, setAvailableOnly] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
-  const [theme, setTheme] = useState('dark');
+  const [theme, setTheme] = useState(() => window.localStorage.getItem('showscout-theme') === 'light' ? 'light' : 'dark');
   const [liked, setLiked] = useState(new Set());
   const [selected, setSelected] = useState(null);
   const [toast, setToast] = useState('');
 
   useEffect(() => { const handler = () => setPath(window.location.pathname); window.addEventListener('popstate', handler); return () => window.removeEventListener('popstate', handler); }, []);
+  useEffect(() => { window.localStorage.setItem('showscout-theme', theme); document.documentElement.style.colorScheme = theme; }, [theme]);
   function navigate(url) { window.history.pushState({}, '', url); setPath(url); setMobileMenu(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }
   function notify(message) { setToast(message); window.clearTimeout(window.__showScoutToast); window.__showScoutToast = window.setTimeout(() => setToast(''), 2200); }
   function toggleLike(id) { setLiked((current) => { const next = new Set(current); next.has(id) ? next.delete(id) : next.add(id); return next; }); }
