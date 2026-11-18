@@ -42,6 +42,8 @@ function CitySelector({ city, onChange }) {
   return <div className="city-selector" ref={selectorRef}><button className="text-control" onClick={() => setOpen((value) => !value)} aria-haspopup="listbox" aria-expanded={open}>{city} <ChevronDown size={14}/></button>{open && <div className="city-menu" role="listbox" aria-label="Choose a Kerala district">{districts.map((district) => <button key={district} role="option" aria-selected={city === district} onClick={() => { onChange(district); setOpen(false); }}>{district}{city === district && <Check size={14}/>}</button>)}</div>}</div>;
 }
 
+function NotFoundPage({ navigate }) { return <div className="app"><main className="simple-page"><span className="eyebrow">SHOWSCOUT / 404</span><h1>That screen is off the map.</h1><p className="simple-lede">The page you requested does not exist. Return to discovery and compare your next movie night.</p><button className="primary-button" onClick={() => navigate('/')}>Back to discovery <ArrowRight size={15}/></button></main></div>; }
+
 function App() {
   const [path, setPath] = useState(window.location.pathname);
   const [query, setQuery] = useState('');
@@ -65,11 +67,13 @@ function App() {
   useEffect(() => { const handler = () => setPath(window.location.pathname); window.addEventListener('popstate', handler); return () => window.removeEventListener('popstate', handler); }, []);
   useEffect(() => { let active = true; getCompare({ movie: activeMovie.id, region: city.toLowerCase(), sort: sort === 'Lowest price' ? 'lowest_price' : sort === 'Nearest' ? 'nearest' : 'best_value' }).then((response) => { if (active) setDataState({ status: 'ready', quality: response.meta?.dataQuality ?? 'unknown' }); }).catch(() => { if (active) setDataState({ status: 'offline', quality: 'demo' }); }); return () => { active = false; }; }, [activeMovie.id, city, sort]);
   useEffect(() => { const match = movies.find((movie) => movie.title.toLowerCase().includes(submittedQuery.toLowerCase())); if (submittedQuery && match) setActiveMovie(match); }, [submittedQuery]);
+  const knownPaths = ['/', '/movies', '/theatres', '/formats', '/about', '/privacy', '/terms', '/data-transparency', '/for-theatres', '/portal', '/alerts'];
   function navigate(url) { window.history.pushState({}, '', url); setPath(url); setMobileMenu(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }
   function notify(message) { setToast(message); window.clearTimeout(window.__showScoutToast); window.__showScoutToast = window.setTimeout(() => setToast(''), 2200); }
   function toggleLike(id) { setLiked((current) => { const next = new Set(current); next.has(id) ? next.delete(id) : next.add(id); return next; }); }
   const filtered = useMemo(() => theatres.filter((theatre) => (!submittedQuery || `${theatre.name} ${theatre.area}`.toLowerCase().includes(submittedQuery.toLowerCase())) && (format === 'Any format' || theatre.formats.includes(format)) && (!verifiedOnly || theatre.source === 'Operator') && (!availableOnly || theatre.shows.some((show) => show.availability !== 'Almost full'))).sort((a, b) => sort === 'Lowest price' ? a.price - b.price : sort === 'Nearest' ? Number.parseFloat(a.distance) - Number.parseFloat(b.distance) : 0), [submittedQuery, format, verifiedOnly, availableOnly, sort]);
 
+  if (!knownPaths.includes(path)) return <NotFoundPage navigate={navigate}/>;
   if (path === '/movies' || path === '/theatres' || path === '/formats' || path === '/about' || path === '/privacy' || path === '/terms' || path === '/data-transparency' || path === '/for-theatres' || path === '/portal' || path === '/alerts') return <SimplePage path={path} navigate={navigate} theme={resolved}/>;
 
   return <div className="app">

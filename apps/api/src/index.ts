@@ -7,8 +7,8 @@ import { createDemoTheatres, demoMovies, demoRegion } from '@showscout/providers
 import { sortTheatres, valueScore } from '@showscout/scoring';
 
 const app = new Hono().basePath('/api/v1');
-const allowedOrigins = (typeof process !== 'undefined' ? process.env.ALLOWED_ORIGINS : '')?.split(',').map((value: string) => value.trim()).filter(Boolean) ?? [];
-app.use('*', cors({ origin: (origin) => allowedOrigins.length === 0 || allowedOrigins.includes(origin) ? origin : undefined }));
+const allowedOrigins = ((typeof process !== 'undefined' ? process.env.ALLOWED_ORIGINS : '') || 'http://localhost:5173,http://localhost:4173').split(',').map((value: string) => value.trim()).filter(Boolean);
+app.use('*', cors({ origin: (origin) => origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0] }));
 app.use('*', bodyLimit({ maxSize: 2_000_000 }));
 app.use('*', async (c, next) => { await next(); c.header('X-Content-Type-Options', 'nosniff'); c.header('Referrer-Policy', 'strict-origin-when-cross-origin'); c.header('Permissions-Policy', 'geolocation=(self), microphone=()'); });
 const reports: Array<{ id: string; theatreId: string; note: string; observedAt: string; status: 'pending' | 'published' }> = [];
