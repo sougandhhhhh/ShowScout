@@ -7,6 +7,7 @@ import { Logo } from './Logo.jsx';
 import { toggleTheme, useTheme } from './theme.js';
 
 const PALETTE = { cyan: 'var(--teal)', pink: 'var(--accent)', magenta: 'var(--accent-text)', plum: 'var(--plum)', gray: 'var(--text-subtle)' };
+const districts = ['Alappuzha', 'Ernakulam', 'Idukki', 'Kannur', 'Kasaragod', 'Kollam', 'Kottayam', 'Kozhikode', 'Malappuram', 'Palakkad', 'Pathanamthitta', 'Thiruvananthapuram', 'Thrissur', 'Wayanad'];
 const movies = [
   { id: 'rekhachithram', title: 'Rekhachithram', language: 'Malayalam', rating: '8.1', genre: 'Drama · Mystery', accent: PALETTE.cyan, icon: '◉' },
   { id: 'bhoothaddam', title: 'Bhoothaddam Bhaskar Narayana', language: 'Malayalam', rating: '7.8', genre: 'Mystery · Thriller', accent: PALETTE.pink, icon: '✦' },
@@ -30,6 +31,14 @@ function ThemeControl({ resolved }) {
   return <div className="theme-control"><button className="icon-button" onClick={toggleTheme} aria-label={label} aria-pressed={resolved === 'dark'} title={`${label} · Shift+D`}>{resolved === 'dark' ? <Sun size={17}/> : <Moon size={17}/>}</button><span className="theme-live" aria-live="polite">{resolved} theme active</span></div>;
 }
 
+function CitySelector({ city, onChange }) {
+  const [open, setOpen] = useState(false);
+  const selectorRef = React.useRef(null);
+  useEffect(() => { const close = (event) => { if (!selectorRef.current?.contains(event.target)) setOpen(false); }; document.addEventListener('click', close); return () => document.removeEventListener('click', close); }, []);
+  useEffect(() => { const onKey = (event) => { if (event.key === 'Escape') setOpen(false); }; window.addEventListener('keydown', onKey); return () => window.removeEventListener('keydown', onKey); }, []);
+  return <div className="city-selector" ref={selectorRef}><button className="text-control" onClick={() => setOpen((value) => !value)} aria-haspopup="listbox" aria-expanded={open}>{city} <ChevronDown size={14}/></button>{open && <div className="city-menu" role="listbox" aria-label="Choose a Kerala district">{districts.map((district) => <button key={district} role="option" aria-selected={city === district} onClick={() => { onChange(district); setOpen(false); }}>{district}{city === district && <Check size={14}/>}</button>)}</div>}</div>;
+}
+
 function App() {
   const [path, setPath] = useState(window.location.pathname);
   const [query, setQuery] = useState('');
@@ -43,6 +52,7 @@ function App() {
   const [availableOnly, setAvailableOnly] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
+  const [city, setCity] = useState('Kochi');
   const { mode, resolved } = useTheme();
   const [liked, setLiked] = useState(new Set());
   const [selected, setSelected] = useState(null);
@@ -57,7 +67,7 @@ function App() {
   if (path === '/movies' || path === '/theatres' || path === '/formats' || path === '/about' || path === '/privacy' || path === '/terms' || path === '/data-transparency' || path === '/for-theatres' || path === '/portal' || path === '/alerts') return <SimplePage path={path} navigate={navigate} theme={resolved}/>;
 
   return <div className="app">
-    <header className="topbar"><Logo/><nav className={mobileMenu ? 'open' : ''}><button className="nav-active" onClick={() => navigate('/')}>Discover</button><button onClick={() => navigate('/movies')}>Movies</button><button onClick={() => navigate('/theatres')}>Theatres</button><button onClick={() => navigate('/formats')}>Formats</button></nav><div className="header-actions"><button className="text-control" onClick={() => notify('Kochi is your current city')}>Kochi <ChevronDown size={14}/></button><ThemeControl mode={mode} resolved={resolved}/><button className="avatar" onClick={() => navigate('/alerts')}>KS</button><button className="menu-button" onClick={() => setMobileMenu(!mobileMenu)} aria-label="Open menu"><Menu size={20}/></button></div></header>
+    <header className="topbar"><Logo/><nav className={mobileMenu ? 'open' : ''}><button className="nav-active" onClick={() => navigate('/')}>Discover</button><button onClick={() => navigate('/movies')}>Movies</button><button onClick={() => navigate('/theatres')}>Theatres</button><button onClick={() => navigate('/formats')}>Formats</button></nav><div className="header-actions"><CitySelector city={city} onChange={(nextCity) => { setCity(nextCity); notify(`${nextCity} selected`); }}/><ThemeControl mode={mode} resolved={resolved}/><button className="avatar" onClick={() => navigate('/alerts')}>KS</button><button className="menu-button" onClick={() => setMobileMenu(!mobileMenu)} aria-label="Open menu"><Menu size={20}/></button></div></header>
     <main>
       <section className="hero"><div className="hero-copy"><div className="eyebrow"><span className="eyebrow-dot"/> LIVE ACROSS KERALA</div><h1>Find the<br/><em>right screen.</em></h1><p>One movie. Every theatre. Every price. Compare your options and make movie night count.</p><form className="search-form" onSubmit={(event) => { event.preventDefault(); setSubmittedQuery(query); notify(query ? `Showing results for “${query}”` : 'Showing every theatre near Kochi'); }}><Search size={19}/><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search a movie, theatre or area..." aria-label="Search a movie, theatre or area"/><button type="submit" aria-label="Search"><ArrowRight size={18}/></button></form><div className="hero-actions"><button onClick={() => { setAvailableOnly(true); document.querySelector('.compare-section')?.scrollIntoView({ behavior: 'smooth' }); notify('Showing seats available tonight'); }}><Zap size={14}/> Cheapest tonight</button><button onClick={() => navigate('/alerts')}><Bell size={14}/> Get an alert</button></div></div><div className="hero-visual"><div className="visual-orbit orbit-a"/><div className="visual-orbit orbit-b"/><div className="visual-card"><span>SHOWSCOUT / 01</span><strong>YOUR<br/><em>MOVIE<br/>NIGHT</em></strong><div><small>KOCHI · 18 NOV</small><small>COMPARE / CHOOSE / GO</small></div></div><div className="visual-chip chip-a"><Check size={13}/> Best value found</div><div className="visual-chip chip-b"><Star size={13}/> 4.5 nearby</div></div></section>
       <section className="section"><div className="section-head"><div><span className="eyebrow">CURATED FOR YOU</span><h2>What are you watching?</h2></div><button className="link-button" onClick={() => navigate('/movies')}>See all movies <ArrowRight size={15}/></button></div><div className="movie-rail">{movies.map((movie) => <button className={`movie-card ${activeMovie.id === movie.id ? 'selected' : ''}`} key={movie.id} onClick={() => { setActiveMovie(movie); notify(`${movie.title} selected`); }}><Poster movie={movie}/><div className="movie-info"><b>{movie.title}</b><span>{movie.language}<span className="rating"><Star size={11} fill="currentColor"/> {movie.rating}</span></span></div></button>)}</div></section>
