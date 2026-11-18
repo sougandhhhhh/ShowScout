@@ -1,5 +1,5 @@
-import type { Region, Theatre } from '@showscout/shared';
-import { MovieSchema, TheatreSchema } from '@showscout/shared';
+import type { Region, Theatre } from '../../shared/src/index.ts';
+import { MovieSchema, TheatreSchema } from '../../shared/src/index.ts';
 
 export const demoRegion: Region = { id: 'reg-kochi', state: 'Kerala', district: 'Ernakulam', city: 'Kochi', slug: 'kochi', lat: 9.9312, lng: 76.2673, isActive: true };
 export const demoMovies = [

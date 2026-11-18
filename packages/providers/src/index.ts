@@ -1,4 +1,4 @@
-import type { Movie, Region, Theatre } from '@showscout/shared';
+import type { Movie, Region, Theatre } from '../../shared/src/index.ts';
 
 export type ProviderCapability = 'movies' | 'theatres' | 'screens' | 'shows' | 'prices' | 'seatMap' | 'liveAvailability' | 'bookingLinks';
 export interface CinemaProvider { key: string; name: string; kind: 'demo' | 'osm' | 'tmdb' | 'operator_portal' | 'booking_stub' | 'community'; capabilities: ProviderCapability[]; fetchMovies?(region: Region): Promise<Movie[]>; fetchTheatres?(region: Region): Promise<Theatre[]>; }

@@ -1,5 +1,5 @@
-import type { Movie, Region } from '@showscout/shared';
-import { MovieSchema } from '@showscout/shared';
+import type { Movie, Region } from '../../shared/src/index.ts';
+import { MovieSchema } from '../../shared/src/index.ts';
 
 export async function fetchTmdbNowPlaying(region: Region, apiKey: string, fetcher: typeof fetch = fetch): Promise<Movie[]> {
   if (!apiKey) return [];
