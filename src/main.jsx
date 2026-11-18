@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { ArrowRight, Bell, CalendarDays, Check, ChevronDown, Clock3, Film, Heart, Info, LayoutGrid, List, Map, MapPin, Menu, Search, SlidersHorizontal, Sparkles, Star, Ticket, X, Zap } from 'lucide-react';
 import './styles.css';
 import './logo.css';
+import { Logo } from './Logo.jsx';
 
 const PALETTE = { cyan: '#60c4d4', pink: '#f3136e', magenta: '#ad1b6d', plum: '#3f1d48', gray: '#bcbcbc' };
 const movies = [
@@ -18,7 +19,6 @@ const theatres = [
   { id: 4, name: 'Vanitha Vineetha', area: 'Palarivattom · Kochi', distance: '5.6 km', eta: '22 min', rating: '4.4', formats: ['Dolby Atmos', 'Recliner'], price: 200, source: 'Operator', updated: '8 min ago', accent: PALETTE.plum, shows: [{ time: '12:00 PM', price: 200, availability: 'Plenty' }, { time: '3:15 PM', price: 220, availability: 'Plenty' }, { time: '6:30 PM', price: 250, availability: 'Filling fast' }, { time: '9:45 PM', price: 250, availability: 'Filling fast' }] },
 ];
 
-function Logo() { return <a className="brand" href="/" aria-label="ShowScout home"><img src="/showscout-logo.svg" alt="ShowScout" /></a>; }
 function Poster({ movie }) { return <div className="poster" style={{ '--poster': movie.accent }}><span className="poster-icon">{movie.icon}</span><span className="poster-kicker">SHOWSCOUT ORIGINAL</span><strong>{movie.title}</strong><small>{movie.genre}</small></div>; }
 function Freshness({ theatre }) { return <span className="freshness"><span className="live-dot"/> Updated {theatre.updated} · {theatre.source}</span>; }
 function Availability({ value }) { const tone = value === 'Plenty' ? 'green' : value === 'Filling fast' ? 'cyan' : 'pink'; return <span className={`availability ${tone}`}><i/> {value}</span>; }

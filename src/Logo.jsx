@@ -1,5 +1,5 @@
 import React from 'react';
 
 export function Logo({ compact = false }) {
-  return <img className={compact ? 'logo-image logo-compact' : 'logo-image'} src="/showscout-logo.svg" alt="ShowScout" />;
+  return <span className={compact ? 'logo-lockup logo-compact' : 'logo-lockup'}><img className="logo-mark" src="/showscout-mark.png" alt="" aria-hidden="true"/><span>Show<span>Scout</span></span></span>;
 }

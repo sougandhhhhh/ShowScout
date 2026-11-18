@@ -3,8 +3,8 @@
   "short_name": "ShowScout",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#11100e",
-  "theme_color": "#e6ae4a",
+  "background_color": "#170f20",
+  "theme_color": "#f3136e",
   "description": "One movie. Every theatre. Every price.",
   "icons": []
 }
