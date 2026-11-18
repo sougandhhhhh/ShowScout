@@ -28,3 +28,18 @@ In a second terminal, run `npm run dev:api` to start the Hono API on port 8787. 
 The current UI intentionally uses clearly labelled demo data. Live provider adapters, operator portal, authenticated API, persistent storage and real outbound booking integrations are the next product phase.
 
 See [docs/PROGRESS.md](docs/PROGRESS.md) for the complete implemented/deferred checklist and [docs/API.md](docs/API.md) for the public API surface.
+
+## Architecture and deployment
+
+The Vite React frontend uses shared Zod contracts from `packages/shared`, demo/provider adapters from `packages/providers`, and scoring from `packages/scoring`. The Hono API is exported for both the Node development server (`apps/api/src/dev.ts`) and Cloudflare Workers (`apps/api/src/worker.ts`).
+
+Live URL: configure `SHOWSCOUT_PUBLIC_URL` for deployment; `https://showscout.example` remains a safe placeholder until a domain is chosen.
+
+| Variable | Purpose |
+| --- | --- |
+| `VITE_API_BASE_URL` | Browser API base URL |
+| `ALLOWED_ORIGINS` | Comma-separated API CORS allowlist |
+| `TMDB_API_KEY` | Optional TMDB bearer credential |
+| `SHOWSCOUT_PUBLIC_URL` | Public URL used by deployment tooling |
+
+Run `npm run build` for the frontend and `npm run build:api` for the API. Deploy `dist` to a static host with SPA fallback and deploy the API with `wrangler deploy` after configuring the CORS allowlist and D1 bindings.

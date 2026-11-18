@@ -6,5 +6,7 @@
   "background_color": "#170f20",
   "theme_color": "#f3136e",
   "description": "One movie. Every theatre. Every price.",
-  "icons": []
+  "icons": [
+    { "src": "/showscout-mark.png", "sizes": "90x96", "type": "image/png", "purpose": "any" }
+  ]
 }

@@ -9,6 +9,7 @@
     "resolveJsonModule": true,
     "allowJs": true,
     "checkJs": false,
+    "types": ["node"],
     "paths": {
       "@showscout/shared": ["./packages/shared/src/index.ts"],
       "@showscout/scoring": ["./packages/scoring/src/index.ts"],

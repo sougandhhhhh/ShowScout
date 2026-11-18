@@ -9,6 +9,14 @@
       (() => { try { const stored = localStorage.getItem('showscout-theme'); const theme = ['light','dark'].includes(stored) ? stored : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); document.documentElement.dataset.theme = theme; document.documentElement.style.colorScheme = theme; } catch { document.documentElement.dataset.theme = 'light'; } })();
     </script>
     <meta name="description" content="ShowScout compares every movie, theatre and price in Kerala." />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="ShowScout — Compare cinema across Kerala" />
+    <meta property="og:description" content="One movie. Every theatre. Every price." />
+    <meta property="og:image" content="/showscout-mark.png" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="ShowScout — Compare cinema across Kerala" />
+    <meta name="twitter:description" content="One movie. Every theatre. Every price." />
+    <link rel="canonical" href="https://showscout.example/" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/showscout-mark.png" />
     <title>ShowScout — One movie. Every theatre. Every price.</title>
