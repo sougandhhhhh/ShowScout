@@ -47,7 +47,7 @@ async function fetchOsmCinemas(region, fetcher = fetch) {
   return (payload.elements ?? []).flatMap((element) => {
     const tags = element.tags;
     if (!tags?.name) return [];
-    const parsed = TheatreSchema.safeParse({ id: `osm-${element.id}`, name: tags.name, slug: tags.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"), address: tags["addr:street"] ?? tags["addr:city"] ?? "Address not provided", regionId: region.id, lat: element.lat ?? region.lat, lng: element.lon ?? region.lng, rating: 0, formats: [], facilities: [], verified: false, dataQuality: "directory", source: "openstreetmap", lastUpdatedAt: (/* @__PURE__ */ new Date()).toISOString(), shows: [] });
+    const parsed = TheatreSchema.safeParse({ id: `osm-${element.id}`, name: tags.name, slug: tags.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"), address: tags["addr:street"] ?? tags["addr:city"] ?? "Address not provided", regionId: region.id, lat: element.lat ?? element.center?.lat ?? region.lat, lng: element.lon ?? element.center?.lon ?? region.lng, rating: 0, formats: [], facilities: [], verified: false, dataQuality: "directory", source: "openstreetmap", lastUpdatedAt: (/* @__PURE__ */ new Date()).toISOString(), shows: [] });
     return parsed.success ? [parsed.data] : [];
   });
 }
