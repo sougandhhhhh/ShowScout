@@ -11,7 +11,8 @@
     "build:api": "tsc -p apps/api/tsconfig.json",
     "preview": "vite preview",
     "seed": "tsx scripts/seed.ts",
-    "test": "vitest run"
+    "test": "vitest run",
+    "contrast": "tsx scripts/check-contrast.ts"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
